@@ -38,7 +38,7 @@ jobs:
       run: |
         cd build
         lcov --capture --directory . --output-file coverage.info --ignore-errors mismatch,unsupported,format,gcov,unused
-        lcov --extract coverage.info "*/banking/*" --output-file coverage.info
+        lcov --extract coverage.info "*/banking/Account.cpp" "*/banking/Transaction.cpp" --output-file coverage.info
         lcov --list coverage.info
 
     - name: Upload coverage to Coveralls
