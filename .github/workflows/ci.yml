@@ -37,7 +37,7 @@ jobs:
     - name: Generate coverage report
       run: |
         cd build
-        lcov --directory . --capture --output-file coverage.info --rc geninfo_ignore_errors=mismatch
+        /usr/bin/geninfo . --output-filename coverage.info --ignore-errors mismatch
         lcov --remove coverage.info '/usr/*' --output-file coverage.info
         lcov --list coverage.info
 
