@@ -26,37 +26,37 @@ TEST_F(AccountTest, InitialBalance) {
 }
 
 TEST_F(AccountTest, AddTransaction) {
-    auto mockTransaction = std::make_shared<MockTransaction>();
-    EXPECT_CALL(*mockTransaction, GetAmount()).WillOnce(Return(500));
-    EXPECT_CALL(*mockTransaction, GetDescription()).WillOnce(Return("Test transaction"));
+    MockTransaction mockTransaction;
+    EXPECT_CALL(mockTransaction, GetAmount()).WillOnce(Return(500));
+    EXPECT_CALL(mockTransaction, GetDescription()).WillOnce(Return("Test transaction"));
 
     account->Lock();
-    account->AddTransaction(mockTransaction);
+    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction, [](Transaction*){}));
     EXPECT_EQ(account->GetBalance(), 1500);
 }
 
 TEST_F(AccountTest, AddNegativeTransaction) {
-    auto mockTransaction = std::make_shared<MockTransaction>();
-    EXPECT_CALL(*mockTransaction, GetAmount()).WillOnce(Return(-300));
-    EXPECT_CALL(*mockTransaction, GetDescription()).WillOnce(Return("Negative transaction"));
+    MockTransaction mockTransaction;
+    EXPECT_CALL(mockTransaction, GetAmount()).WillOnce(Return(-300));
+    EXPECT_CALL(mockTransaction, GetDescription()).WillOnce(Return("Negative transaction"));
 
     account->Lock();
-    account->AddTransaction(mockTransaction);
+    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction, [](Transaction*){}));
     EXPECT_EQ(account->GetBalance(), 700);
 }
 
 TEST_F(AccountTest, GetTransactionHistory) {
-    auto mockTransaction1 = std::make_shared<MockTransaction>();
-    auto mockTransaction2 = std::make_shared<MockTransaction>();
+    MockTransaction mockTransaction1;
+    MockTransaction mockTransaction2;
 
-    EXPECT_CALL(*mockTransaction1, GetAmount()).WillOnce(Return(500));
-    EXPECT_CALL(*mockTransaction1, GetDescription()).WillOnce(Return("First transaction"));
-    EXPECT_CALL(*mockTransaction2, GetAmount()).WillOnce(Return(-200));
-    EXPECT_CALL(*mockTransaction2, GetDescription()).WillOnce(Return("Second transaction"));
+    EXPECT_CALL(mockTransaction1, GetAmount()).WillOnce(Return(500));
+    EXPECT_CALL(mockTransaction1, GetDescription()).WillOnce(Return("First transaction"));
+    EXPECT_CALL(mockTransaction2, GetAmount()).WillOnce(Return(-200));
+    EXPECT_CALL(mockTransaction2, GetDescription()).WillOnce(Return("Second transaction"));
 
     account->Lock();
-    account->AddTransaction(mockTransaction1);
-    account->AddTransaction(mockTransaction2);
+    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction1, [](Transaction*){}));
+    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction2, [](Transaction*){}));
 
     const auto& history = account->GetTransactionHistory();
     EXPECT_EQ(history.size(), 2);
