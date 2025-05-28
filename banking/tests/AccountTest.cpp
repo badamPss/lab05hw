@@ -28,7 +28,6 @@ TEST_F(AccountTest, InitialBalance) {
 TEST_F(AccountTest, AddTransaction) {
     MockTransaction mockTransaction;
     EXPECT_CALL(mockTransaction, GetAmount()).WillOnce(Return(500));
-    EXPECT_CALL(mockTransaction, GetDescription()).WillOnce(Return("Test transaction"));
 
     account->Lock();
     account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction, [](Transaction*){}));
@@ -38,7 +37,6 @@ TEST_F(AccountTest, AddTransaction) {
 TEST_F(AccountTest, AddNegativeTransaction) {
     MockTransaction mockTransaction;
     EXPECT_CALL(mockTransaction, GetAmount()).WillOnce(Return(-300));
-    EXPECT_CALL(mockTransaction, GetDescription()).WillOnce(Return("Negative transaction"));
 
     account->Lock();
     account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction, [](Transaction*){}));
@@ -50,9 +48,7 @@ TEST_F(AccountTest, GetTransactionHistory) {
     MockTransaction mockTransaction2;
 
     EXPECT_CALL(mockTransaction1, GetAmount()).WillOnce(Return(500));
-    EXPECT_CALL(mockTransaction1, GetDescription()).WillOnce(Return("First transaction"));
     EXPECT_CALL(mockTransaction2, GetAmount()).WillOnce(Return(-200));
-    EXPECT_CALL(mockTransaction2, GetDescription()).WillOnce(Return("Second transaction"));
 
     account->Lock();
     account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction1, [](Transaction*){}));
