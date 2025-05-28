@@ -4,19 +4,9 @@ project(banking VERSION 1.0.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Включаем тестирование
 enable_testing()
 
-# Добавляем Google Test
 include(FetchContent)
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG release-1.12.1
-)
-FetchContent_MakeAvailable(googletest)
-
-# Добавляем Google Mock
 FetchContent_Declare(
     googlemock
     GIT_REPOSITORY https://github.com/google/googletest.git
@@ -24,7 +14,6 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(googlemock)
 
-# Основная библиотека
 add_library(banking
     Account.cpp
     Account.h
@@ -34,7 +23,6 @@ add_library(banking
 
 target_include_directories(banking PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Тесты
 add_executable(banking_tests
     tests/AccountTest.cpp
     tests/TransactionTest.cpp
