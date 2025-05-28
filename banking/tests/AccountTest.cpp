@@ -30,6 +30,7 @@ TEST_F(AccountTest, AddTransaction) {
     EXPECT_CALL(*mockTransaction, GetAmount()).WillOnce(Return(500));
     EXPECT_CALL(*mockTransaction, GetDescription()).WillOnce(Return("Test transaction"));
 
+    account->Lock();
     account->AddTransaction(mockTransaction);
     EXPECT_EQ(account->GetBalance(), 1500);
 }
@@ -39,6 +40,7 @@ TEST_F(AccountTest, AddNegativeTransaction) {
     EXPECT_CALL(*mockTransaction, GetAmount()).WillOnce(Return(-300));
     EXPECT_CALL(*mockTransaction, GetDescription()).WillOnce(Return("Negative transaction"));
 
+    account->Lock();
     account->AddTransaction(mockTransaction);
     EXPECT_EQ(account->GetBalance(), 700);
 }
@@ -52,6 +54,7 @@ TEST_F(AccountTest, GetTransactionHistory) {
     EXPECT_CALL(*mockTransaction2, GetAmount()).WillOnce(Return(-200));
     EXPECT_CALL(*mockTransaction2, GetDescription()).WillOnce(Return("Second transaction"));
 
+    account->Lock();
     account->AddTransaction(mockTransaction1);
     account->AddTransaction(mockTransaction2);
 
