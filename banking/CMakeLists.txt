@@ -47,6 +47,8 @@ gtest_discover_tests(banking_tests)
 
 # Настройка для Coveralls
 if(CMAKE_BUILD_TYPE STREQUAL "Coverage")
+    target_compile_options(banking PRIVATE --coverage)
+    target_link_options(banking PRIVATE --coverage)
     target_compile_options(banking_tests PRIVATE --coverage)
     target_link_options(banking_tests PRIVATE --coverage)
 endif() 
