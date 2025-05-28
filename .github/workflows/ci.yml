@@ -37,8 +37,8 @@ jobs:
     - name: Generate coverage report
       run: |
         cd build
-        /usr/bin/geninfo . --output-filename coverage.info --ignore-errors mismatch
-        lcov --remove coverage.info '/usr/*' --output-file coverage.info
+        lcov --capture --directory . --output-file coverage.info --ignore-errors inconsistent,unsupported,format,gcov,unused
+        lcov --extract coverage.info "*/banking/*" --output-file coverage.info
         lcov --list coverage.info
 
     - name: Upload coverage to Coveralls
