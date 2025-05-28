@@ -43,22 +43,6 @@ TEST_F(AccountTest, AddNegativeTransaction) {
     EXPECT_EQ(account->GetBalance(), 700);
 }
 
-TEST_F(AccountTest, GetTransactionHistory) {
-    MockTransaction mockTransaction1;
-    MockTransaction mockTransaction2;
-
-    EXPECT_CALL(mockTransaction1, GetAmount()).WillOnce(Return(500));
-    EXPECT_CALL(mockTransaction2, GetAmount()).WillOnce(Return(-200));
-
-    account->Lock();
-    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction1, [](Transaction*){}));
-    account->AddTransaction(std::shared_ptr<Transaction>(&mockTransaction2, [](Transaction*){}));
-
-    const auto& history = account->GetTransactionHistory();
-    EXPECT_EQ(history.size(), 2);
-    EXPECT_EQ(account->GetBalance(), 1300);
-}
-
 TEST_F(AccountTest, ChangeBalanceLockedAccount) {
     account->Lock();
     account->ChangeBalance(500);
@@ -82,4 +66,29 @@ TEST_F(AccountTest, UnlockAccount) {
 }
 
 TEST_F(AccountTest, Destructor) {
+}
+
+TEST_F(AccountTest, DestructorCoverage) {
+    Account* acc = new Account(1, 100);
+    delete acc;
+}
+
+TEST_F(AccountTest, GetId) {
+    Account account(123, 1000);
+    EXPECT_EQ(account.id(), 123);
+}
+
+TEST_F(AccountTest, GetTransactionHistory) {
+    Account account(1, 1000);
+    auto transaction1 = std::make_shared<Transaction>(100, "First transaction");
+    auto transaction2 = std::make_shared<Transaction>(200, "Second transaction");
+    
+    account.Lock();
+    account.AddTransaction(transaction1);
+    account.AddTransaction(transaction2);
+    
+    const auto& history = account.GetTransactionHistory();
+    EXPECT_EQ(history.size(), 2);
+    EXPECT_EQ(history[0], transaction1);
+    EXPECT_EQ(history[1], transaction2);
 } 

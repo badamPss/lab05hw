@@ -105,4 +105,31 @@ TEST_F(TransactionTest, MakeTransactionFeeTooHigh) {
 TEST_F(TransactionTest, DefaultConstructorFee) {
     Transaction transaction;
     EXPECT_EQ(transaction.fee(), 1);
+}
+
+TEST_F(TransactionTest, SetFee) {
+    Transaction transaction;
+    transaction.set_fee(5);
+    EXPECT_EQ(transaction.fee(), 5);
+}
+
+TEST_F(TransactionTest, GetAmountAndDescription) {
+    Transaction transaction(100, "Test transaction");
+    EXPECT_EQ(transaction.GetAmount(), 100);
+    EXPECT_EQ(transaction.GetDescription(), "Test transaction");
+}
+
+TEST_F(TransactionTest, MakeTransactionFeeTooBig) {
+    Account from(1, 1000);
+    Account to(2, 500);
+    Transaction transaction;
+    transaction.set_fee(300);
+    // fee_ * 2 = 600 > 500, должно вернуть false
+    bool result = transaction.Make(from, to, 500);
+    EXPECT_FALSE(result);
+}
+
+TEST_F(TransactionTest, DestructorCoverage) {
+    Transaction* tr = new Transaction(10, "desc");
+    delete tr;
 } 
