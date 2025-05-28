@@ -2,6 +2,8 @@
 #include <gmock/gmock.h>
 #include "Transaction.h"
 #include "Account.h"
+using ::testing::Return;
+using ::testing::_;
 
 class TransactionTest : public ::testing::Test {
 protected:
@@ -35,7 +37,7 @@ TEST_F(TransactionTest, CreateEmptyDescriptionTransaction) {
 class MockAccount : public Account {
 public:
     MockAccount(int id, int balance) : Account(id, balance) {}
-    MOCK_METHOD(int, id, (), (const, override));
+    MOCK_METHOD(int, id, (), (const));
     MOCK_METHOD(int, GetBalance, (), (const, override));
     MOCK_METHOD(void, ChangeBalance, (int diff), (override));
     MOCK_METHOD(void, Lock, (), (override));
