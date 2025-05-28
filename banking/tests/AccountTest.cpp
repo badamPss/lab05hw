@@ -65,8 +65,9 @@ TEST_F(AccountTest, ChangeBalanceLockedAccount) {
     EXPECT_EQ(account->GetBalance(), 1500);
 }
 
-TEST_F(AccountTest, ChangeBalanceUnlockedAccountThrows) {
-    EXPECT_THROW(account->ChangeBalance(500), std::runtime_error);
+TEST_F(AccountTest, ChangeBalanceUnlockedAccount) {
+    account->ChangeBalance(100);
+    EXPECT_EQ(account->GetBalance(), 1100);
 }
 
 TEST_F(AccountTest, LockAccount) {
@@ -77,9 +78,7 @@ TEST_F(AccountTest, LockAccount) {
 TEST_F(AccountTest, UnlockAccount) {
     account->Lock();
     account->Unlock();
-
-    account->ChangeBalance(100); 
-    EXPECT_EQ(account->GetBalance(), 1100);
+    EXPECT_THROW(account->Unlock(), std::runtime_error);
 }
 
 TEST_F(AccountTest, Destructor) {

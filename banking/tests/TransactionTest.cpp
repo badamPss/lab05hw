@@ -45,86 +45,61 @@ public:
 };
 
 TEST_F(TransactionTest, MakeTransactionSuccess) {
-    MockAccount from(1, 1000);
-    MockAccount to(2, 500);
+    Account from(1, 1000);
+    Account to(2, 500);
     Transaction transaction;
-
-    EXPECT_CALL(from, id()).WillRepeatedly(Return(1));
-    EXPECT_CALL(to, id()).WillRepeatedly(Return(2));
-    EXPECT_CALL(from, Lock()).Times(1);
-    EXPECT_CALL(from, Unlock()).Times(1);
-    EXPECT_CALL(to, Lock()).Times(1);
-    EXPECT_CALL(to, Unlock()).Times(1);
-    EXPECT_CALL(to, ChangeBalance(500)).Times(1);
-    EXPECT_CALL(to, GetBalance()).WillOnce(Return(1000)); // Баланс to после Credit(500)
-    EXPECT_CALL(to, ChangeBalance(-501)).Times(1); // Debit(500 + fee)
 
     bool result = transaction.Make(from, to, 500);
     EXPECT_TRUE(result);
+    EXPECT_EQ(from.GetBalance(), 1000 - 500 - transaction.fee());
+    EXPECT_EQ(to.GetBalance(), 500 + 500);
 }
 
 TEST_F(TransactionTest, MakeTransactionInsufficientFunds) {
-    MockAccount from(1, 1000);
-    MockAccount to(2, 500);
+    Account from(1, 1000);
+    Account to(2, 500);
     Transaction transaction;
 
-    EXPECT_CALL(from, id()).WillRepeatedly(Return(1));
-    EXPECT_CALL(to, id()).WillRepeatedly(Return(2));
-    EXPECT_CALL(from, Lock()).Times(1);
-    EXPECT_CALL(from, Unlock()).Times(1);
-    EXPECT_CALL(to, Lock()).Times(1);
-    EXPECT_CALL(to, Unlock()).Times(1);
-    EXPECT_CALL(to, ChangeBalance(50)).Times(1); // Credit
-    EXPECT_CALL(to, GetBalance()).WillOnce(Return(500)); // Баланс to после Credit(50)
-    EXPECT_CALL(to, ChangeBalance(-50)).Times(1); // Отмена Credit при недостаточном балансе для Debit
-
-    bool result = transaction.Make(from, to, 50);
+    bool result = transaction.Make(from, to, 10000);
     EXPECT_FALSE(result);
+    EXPECT_EQ(from.GetBalance(), 1000);
+    EXPECT_EQ(to.GetBalance(), 500);
 }
 
 TEST_F(TransactionTest, MakeTransactionSameAccount) {
-    MockAccount acc(1, 1000);
+    Account acc(1, 1000);
     Transaction transaction;
 
-    EXPECT_CALL(acc, id()).WillRepeatedly(Return(1));
-    
     EXPECT_THROW(transaction.Make(acc, acc, 100), std::logic_error);
 }
 
 TEST_F(TransactionTest, MakeTransactionNegativeSum) {
-    MockAccount from(1, 1000);
-    MockAccount to(2, 500);
+    Account from(1, 1000);
+    Account to(2, 500);
     Transaction transaction;
-
-    EXPECT_CALL(from, id()).WillRepeatedly(Return(1));
-    EXPECT_CALL(to, id()).WillRepeatedly(Return(2));
 
     EXPECT_THROW(transaction.Make(from, to, -100), std::invalid_argument);
 }
 
 TEST_F(TransactionTest, MakeTransactionTooSmallSum) {
-    MockAccount from(1, 1000);
-    MockAccount to(2, 500);
+    Account from(1, 1000);
+    Account to(2, 500);
     Transaction transaction;
 
-    EXPECT_CALL(from, id()).WillRepeatedly(Return(1));
-    EXPECT_CALL(to, id()).WillRepeatedly(Return(2));
-
-    EXPECT_THROW(transaction.Make(from, to, 50), std::logic_error); // Сумма меньше 100
+    EXPECT_THROW(transaction.Make(from, to, 50), std::logic_error);
 }
 
 TEST_F(TransactionTest, MakeTransactionFeeTooHigh) {
-    MockAccount from(1, 1000);
-    MockAccount to(2, 500);
+    Account from(1, 1000);
+    Account to(2, 500);
     Transaction transaction;
 
-    transaction.set_fee(60); // Устанавливаем комиссию так, чтобы fee * 2 > sum (120 > 100)
-
-    EXPECT_CALL(from, id()).WillRepeatedly(Return(1));
-    EXPECT_CALL(to, id()).WillRepeatedly(Return(2));
+    transaction.set_fee(60);
 
     bool result = transaction.Make(from, to, 100);
     EXPECT_FALSE(result);
+    EXPECT_EQ(from.GetBalance(), 1000);
+    EXPECT_EQ(to.GetBalance(), 500);
 }
 
 TEST_F(TransactionTest, DefaultConstructorFee) {

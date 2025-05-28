@@ -10,7 +10,6 @@ Account::~Account() {}
 int Account::GetBalance() const { return balance_; }
 
 void Account::ChangeBalance(int diff) {
-  if (!is_locked_) throw std::runtime_error("at first lock the account");
   balance_ += diff;
 }
 
@@ -19,7 +18,10 @@ void Account::Lock() {
   is_locked_ = true;
 }
 
-void Account::Unlock() { is_locked_ = false; }
+void Account::Unlock() {
+  if (!is_locked_) throw std::runtime_error("already unlocked");
+  is_locked_ = false;
+}
 
 void Account::AddTransaction(std::shared_ptr<Transaction> transaction) {
     if (!is_locked_) throw std::runtime_error("at first lock the account");
