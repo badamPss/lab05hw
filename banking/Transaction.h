@@ -8,6 +8,7 @@ class Account;
 
 class Transaction {
  public:
+  Transaction(int amount, const std::string& description);
   Transaction();
   virtual ~Transaction();
 
@@ -26,4 +27,6 @@ class Transaction {
   virtual void SaveToDataBase(Account& from, Account& to, int sum);
 
   int fee_;
+  int amount_;
+  std::string description_;
 };
