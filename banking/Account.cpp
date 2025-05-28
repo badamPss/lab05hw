@@ -20,3 +20,13 @@ void Account::Lock() {
 }
 
 void Account::Unlock() { is_locked_ = false; }
+
+void Account::AddTransaction(std::shared_ptr<Transaction> transaction) {
+    if (!is_locked_) throw std::runtime_error("at first lock the account");
+    transactions_.push_back(transaction);
+    balance_ += transaction->GetAmount();
+}
+
+const std::vector<std::shared_ptr<Transaction>>& Account::GetTransactionHistory() const {
+    return transactions_;
+}

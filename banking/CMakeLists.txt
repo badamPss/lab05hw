@@ -35,6 +35,13 @@ target_link_libraries(banking_tests
     GTest::gmock_main
 )
 
+target_include_directories(banking_tests PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/tests
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${googlemock_SOURCE_DIR}/googlemock/include
+    ${googlemock_SOURCE_DIR}/googletest/include
+)
+
 include(GoogleTest)
 gtest_discover_tests(banking_tests)
 

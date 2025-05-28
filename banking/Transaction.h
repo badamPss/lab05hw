@@ -11,11 +11,14 @@ class Transaction {
   int fee() const { return fee_; }
   void set_fee(int fee) { fee_ = fee; }
 
+  virtual int GetAmount() const;
+  virtual std::string GetDescription() const;
+
  private:
   void Credit(Account& accout, int sum);
   bool Debit(Account& accout, int sum);
 
-  // Virtual to test.
+  
   virtual void SaveToDataBase(Account& from, Account& to, int sum);
 
   int fee_;

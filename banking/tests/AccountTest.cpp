@@ -15,7 +15,7 @@ public:
 class AccountTest : public ::testing::Test {
 protected:
     void SetUp() override {
-        account = std::make_unique<Account>(1000);
+        account = std::make_unique<Account>(1, 1000);
     }
 
     std::unique_ptr<Account> account;
