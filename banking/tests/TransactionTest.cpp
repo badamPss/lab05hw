@@ -57,6 +57,8 @@ TEST_F(TransactionTest, MakeTransactionSuccess) {
     EXPECT_CALL(to, ChangeBalance(500)).Times(1);
     EXPECT_CALL(from, Unlock()).Times(1);
     EXPECT_CALL(to, Unlock()).Times(1);
+    EXPECT_CALL(from, GetBalance()).WillOnce(Return(499));
+    EXPECT_CALL(to, GetBalance()).WillOnce(Return(1000));
 
     bool result = transaction.Make(from, to, 500);
     EXPECT_TRUE(result);
@@ -74,6 +76,8 @@ TEST_F(TransactionTest, MakeTransactionInsufficientFunds) {
     EXPECT_CALL(to, ChangeBalance(-10000)).Times(1);
     EXPECT_CALL(from, Unlock()).Times(1);
     EXPECT_CALL(to, Unlock()).Times(1);
+    EXPECT_CALL(from, GetBalance()).WillOnce(Return(1000));
+    EXPECT_CALL(to, GetBalance()).WillOnce(Return(500));
 
     bool result = transaction.Make(from, to, 10000);
     EXPECT_FALSE(result);
