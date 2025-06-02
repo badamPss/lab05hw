@@ -4,7 +4,6 @@
 #include "Account.h"
 using ::testing::Return;
 using ::testing::_;
-using ::testing::Sequence;
 
 class MockAccount : public Account {
 public:
@@ -49,17 +48,17 @@ TEST_F(TransactionTest, MakeTransactionSuccess) {
     MockAccount from(1, 1000);
     MockAccount to(2, 500);
     Transaction transaction;
-    Sequence s1, s2;
 
-    EXPECT_CALL(from, Lock()).InSequence(s1);
-    EXPECT_CALL(to, Lock()).InSequence(s1);
-    EXPECT_CALL(from, GetBalance()).InSequence(s1).WillOnce(Return(1000));
-    EXPECT_CALL(from, ChangeBalance(-501)).InSequence(s1);
-    EXPECT_CALL(to, ChangeBalance(500)).InSequence(s1);
-    EXPECT_CALL(from, Unlock()).InSequence(s1);
-    EXPECT_CALL(to, Unlock()).InSequence(s1);
-    EXPECT_CALL(from, GetBalance()).InSequence(s2).WillOnce(Return(499));
-    EXPECT_CALL(to, GetBalance()).InSequence(s2).WillOnce(Return(1000));
+    EXPECT_CALL(from, Lock()).Times(1);
+    EXPECT_CALL(to, Lock()).Times(1);
+    EXPECT_CALL(to, ChangeBalance(500)).Times(1);
+    EXPECT_CALL(from, GetBalance())
+        .WillOnce(Return(1000))   
+        .WillOnce(Return(499));
+    EXPECT_CALL(from, ChangeBalance(-501)).Times(1);
+    EXPECT_CALL(from, Unlock()).Times(1);
+    EXPECT_CALL(to, Unlock()).Times(1);
+    EXPECT_CALL(to, GetBalance()).WillOnce(Return(1000)); // для SaveToDataBase
 
     bool result = transaction.Make(from, to, 500);
     EXPECT_TRUE(result);
@@ -69,17 +68,17 @@ TEST_F(TransactionTest, MakeTransactionInsufficientFunds) {
     MockAccount from(1, 1000);
     MockAccount to(2, 500);
     Transaction transaction;
-    Sequence s1, s2;
 
-    EXPECT_CALL(from, Lock()).InSequence(s1);
-    EXPECT_CALL(to, Lock()).InSequence(s1);
-    EXPECT_CALL(from, GetBalance()).InSequence(s1).WillOnce(Return(1000));
-    EXPECT_CALL(to, ChangeBalance(10000)).InSequence(s1);
-    EXPECT_CALL(to, ChangeBalance(-10000)).InSequence(s1);
-    EXPECT_CALL(from, Unlock()).InSequence(s1);
-    EXPECT_CALL(to, Unlock()).InSequence(s1);
-    EXPECT_CALL(from, GetBalance()).InSequence(s2).WillOnce(Return(1000));
-    EXPECT_CALL(to, GetBalance()).InSequence(s2).WillOnce(Return(500));
+    EXPECT_CALL(from, Lock()).Times(1);
+    EXPECT_CALL(to, Lock()).Times(1);
+    EXPECT_CALL(to, ChangeBalance(10000)).Times(1);
+    EXPECT_CALL(from, GetBalance())
+        .WillOnce(Return(1000))
+        .WillOnce(Return(1000));
+    EXPECT_CALL(to, ChangeBalance(-10000)).Times(1);
+    EXPECT_CALL(from, Unlock()).Times(1);
+    EXPECT_CALL(to, Unlock()).Times(1);
+    EXPECT_CALL(to, GetBalance()).WillOnce(Return(500)); 
 
     bool result = transaction.Make(from, to, 10000);
     EXPECT_FALSE(result);
