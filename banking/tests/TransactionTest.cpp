@@ -4,6 +4,17 @@
 #include "Account.h"
 using ::testing::Return;
 using ::testing::_;
+using ::testing::NiceMock;
+
+class MockAccount : public Account {
+public:
+    MockAccount(int id, int balance) : Account(id, balance) {}
+    MOCK_METHOD(int, id, (), (const));
+    MOCK_METHOD(int, GetBalance, (), (const, override));
+    MOCK_METHOD(void, ChangeBalance, (int diff), (override));
+    MOCK_METHOD(void, Lock, (), (override));
+    MOCK_METHOD(void, Unlock, (), (override));
+};
 
 class TransactionTest : public ::testing::Test {
 protected:
@@ -34,36 +45,38 @@ TEST_F(TransactionTest, CreateEmptyDescriptionTransaction) {
     EXPECT_EQ(transaction.GetDescription(), "");
 }
 
-class MockAccount : public Account {
-public:
-    MockAccount(int id, int balance) : Account(id, balance) {}
-    MOCK_METHOD(int, id, (), (const));
-    MOCK_METHOD(int, GetBalance, (), (const, override));
-    MOCK_METHOD(void, ChangeBalance, (int diff), (override));
-    MOCK_METHOD(void, Lock, (), (override));
-    MOCK_METHOD(void, Unlock, (), (override));
-};
-
 TEST_F(TransactionTest, MakeTransactionSuccess) {
-    Account from(1, 1000);
-    Account to(2, 500);
+    NiceMock<MockAccount> from(1, 1000);
+    NiceMock<MockAccount> to(2, 500);
     Transaction transaction;
+
+    EXPECT_CALL(from, Lock()).Times(1);
+    EXPECT_CALL(to, Lock()).Times(1);
+    EXPECT_CALL(from, GetBalance()).WillOnce(Return(1000));
+    EXPECT_CALL(from, ChangeBalance(-501)).Times(1);
+    EXPECT_CALL(to, ChangeBalance(500)).Times(1);
+    EXPECT_CALL(from, Unlock()).Times(1);
+    EXPECT_CALL(to, Unlock()).Times(1);
 
     bool result = transaction.Make(from, to, 500);
     EXPECT_TRUE(result);
-    EXPECT_EQ(from.GetBalance(), 1000 - 500 - transaction.fee());
-    EXPECT_EQ(to.GetBalance(), 500 + 500);
 }
 
 TEST_F(TransactionTest, MakeTransactionInsufficientFunds) {
-    Account from(1, 1000);
-    Account to(2, 500);
+    NiceMock<MockAccount> from(1, 1000);
+    NiceMock<MockAccount> to(2, 500);
     Transaction transaction;
+
+    EXPECT_CALL(from, Lock()).Times(1);
+    EXPECT_CALL(to, Lock()).Times(1);
+    EXPECT_CALL(from, GetBalance()).WillOnce(Return(1000));
+    EXPECT_CALL(to, ChangeBalance(10000)).Times(1);
+    EXPECT_CALL(to, ChangeBalance(-10000)).Times(1);
+    EXPECT_CALL(from, Unlock()).Times(1);
+    EXPECT_CALL(to, Unlock()).Times(1);
 
     bool result = transaction.Make(from, to, 10000);
     EXPECT_FALSE(result);
-    EXPECT_EQ(from.GetBalance(), 1000);
-    EXPECT_EQ(to.GetBalance(), 500);
 }
 
 TEST_F(TransactionTest, MakeTransactionSameAccount) {
@@ -82,24 +95,33 @@ TEST_F(TransactionTest, MakeTransactionNegativeSum) {
 }
 
 TEST_F(TransactionTest, MakeTransactionTooSmallSum) {
-    Account from(1, 1000);
-    Account to(2, 500);
+    NiceMock<MockAccount> from(1, 1000);
+    NiceMock<MockAccount> to(2, 500);
     Transaction transaction;
+
+    EXPECT_CALL(from, Lock()).Times(0);
+    EXPECT_CALL(to, Lock()).Times(0);
+    EXPECT_CALL(from, GetBalance()).Times(0);
+    EXPECT_CALL(from, ChangeBalance(_)).Times(0);
+    EXPECT_CALL(to, ChangeBalance(_)).Times(0);
 
     EXPECT_THROW(transaction.Make(from, to, 50), std::logic_error);
 }
 
 TEST_F(TransactionTest, MakeTransactionFeeTooHigh) {
-    Account from(1, 1000);
-    Account to(2, 500);
+    NiceMock<MockAccount> from(1, 1000);
+    NiceMock<MockAccount> to(2, 500);
     Transaction transaction;
-
     transaction.set_fee(60);
+
+    EXPECT_CALL(from, Lock()).Times(0);
+    EXPECT_CALL(to, Lock()).Times(0);
+    EXPECT_CALL(from, GetBalance()).Times(0);
+    EXPECT_CALL(from, ChangeBalance(_)).Times(0);
+    EXPECT_CALL(to, ChangeBalance(_)).Times(0);
 
     bool result = transaction.Make(from, to, 100);
     EXPECT_FALSE(result);
-    EXPECT_EQ(from.GetBalance(), 1000);
-    EXPECT_EQ(to.GetBalance(), 500);
 }
 
 TEST_F(TransactionTest, DefaultConstructorFee) {
@@ -124,7 +146,6 @@ TEST_F(TransactionTest, MakeTransactionFeeTooBig) {
     Account to(2, 500);
     Transaction transaction;
     transaction.set_fee(300);
-    // fee_ * 2 = 600 > 500, должно вернуть false
     bool result = transaction.Make(from, to, 500);
     EXPECT_FALSE(result);
 }
