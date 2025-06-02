@@ -42,7 +42,7 @@ jobs:
         lcov --list coverage.info
 
     - name: Upload coverage to Coveralls
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: coverage-report
         path: banking/build/coverage.info
